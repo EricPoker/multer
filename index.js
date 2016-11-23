@@ -33,12 +33,13 @@ function makePromise(multer, name) {
   multer[name] = function () {
     const middleware = fn.apply(this, arguments)
 
-    return (ctx, next) => {
-      return new Promise((resolve, reject) => {
-        middleware(ctx.req, ctx.res, (err) => {
-          err ? reject(err) : resolve(ctx)
+    return function* (next) {
+      yield new Promise((resolve, reject) => {
+        middleware(this.req, this.res, (err) => {
+          err ? reject(err) : resolve(this)
         })
-      }).then(next)
+      })
+      yield next
     }
   }
 }
